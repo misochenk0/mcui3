@@ -1,5 +1,6 @@
-import { reactive, ref, h, render, shallowRef, markRaw, inject, getCurrentInstance, AppContext } from 'vue'
+import { reactive, h, render, shallowRef, markRaw, inject } from 'vue'
 import DrawerContainer from '@/components/templates/McDrawer/McDrawerContainer.vue'
+import { getStoredAppContext } from '@/storedAppContext'
 import type { IDrawerServiceState, IDrawerProps, IDrawerState } from '@/types/IDrawer'
 import { IDSOptions } from '@/types'
 
@@ -14,24 +15,28 @@ const drawerServiceState = reactive<IDrawerServiceState>({
   closeServiceState: closeServiceState
 })
 
-const appContent = shallowRef<AppContext | null>(null)
 const drawerComponents = shallowRef({})
 const reactiveProps = reactive<{ drawers: IDrawerState[] }>({ drawers: [] })
 
 const createDrawerContainer = () => {
+  if (typeof window === 'undefined') return
   const drawerContainerElement = document.createElement('div')
   drawerContainerElement.id = 'drawer-container'
   document.body.appendChild(drawerContainerElement)
 
   const vnode = h(DrawerContainer, { drawerServiceState, reactiveProps })
-  vnode.appContext = appContent.value
+  vnode.appContext = getStoredAppContext()
   render(vnode, drawerContainerElement)
 }
 
-// Если компонент DrawerContainer ещё не был добавлен в DOM, создаем его
 const ensureDrawerContainerExists = () => {
-  if (!document.getElementById('drawer-container')) {
+  if (document.getElementById('drawer-container')) return
+  if (getStoredAppContext()) {
     createDrawerContainer()
+  } else {
+    console.warn(
+      'Mediacube UI Drawer: app context not available. Ensure MediacubeUI is installed with app.use(MediacubeUI, { drawerComponents: {...} }) so the drawer container can be created.'
+    )
   }
 }
 
@@ -86,8 +91,6 @@ const closeAllDrawers = () => {
 }
 
 export function useDrawer() {
-  const instance = getCurrentInstance()
-  appContent.value = instance?.appContext || null
   const dsOptions = inject<IDSOptions>('dsOptions', {})
   if (dsOptions.drawerComponents) {
     drawerComponents.value = dsOptions.drawerComponents

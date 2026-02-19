@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onMounted, type PropType, reactive, ref, useSlots, watch } from 'vue'
-import { useHelper, useHasSlot } from '@/composables'
+import { computed, onBeforeUnmount, onMounted, type PropType, reactive, ref, useSlots, watch } from 'vue'
+import { useHelper } from '@/composables'
 import { Weights } from '@/enums'
 import {
   type ITableColumn,
@@ -56,7 +56,6 @@ const emit = defineEmits<{
 
 const helper = useHelper()
 const slots = useSlots()
-const { hasSlot } = useHasSlot(slots)
 const props = defineProps({
   columns: {
     type: Array as PropType<ITableColumn[]>,
@@ -242,7 +241,19 @@ const computedColumns = computed((): ITableColumnEnriched[] => {
     return {
       ...column,
       fixedFirst,
-      fixedLast
+      fixedLast,
+      style: {
+        ...(column.width
+          ? {
+              '--mc-table-cell-width': `${column.width}px`,
+              '--mc-table-cell-max-width': `${column.width}px`,
+              '--mc-table-cell-min-width': `${column.width}px`
+            }
+          : {
+              '--mc-table-cell-min-width': column.minWidth && `${column.minWidth}px`,
+              '--mc-table-cell-width': '100%'
+            })
+      }
     }
   })
 })
@@ -270,7 +281,6 @@ const computedHeaderColumns = computed((): ITableColumnEnriched[] => {
 const computedBodyColumns = computed((): ITableColumnEnriched[] => {
   return computedColumns.value.map((column) => ({
     ...column,
-    hasRightSlot: hasSlot(`${column.field}-right`),
     class: {
       'mc-table__table_body-cell': true,
       'mc-table__table_body-cell--fixed-first': column.fixedFirst,
@@ -331,21 +341,6 @@ onBeforeUnmount((): void => {
   rafPause()
 })
 
-const getColumnStyle = (column: ITableColumnEnriched): { [key: string]: string | number | undefined } => {
-  return {
-    ...(column.width
-      ? {
-          '--mc-table-cell-width': `${column.width}px`,
-          '--mc-table-cell-max-width': `${column.width}px`,
-          '--mc-table-cell-min-width': `${column.width}px`
-        }
-      : {
-          '--mc-table-cell-min-width': column.minWidth && `${column.minWidth}px`,
-          '--mc-table-cell-width': '100%'
-        })
-  }
-}
-
 const onBodyScroll = () => {
   if (!mcTable.value) return
   const { scrollLeft, scrollWidth, clientWidth } = mcTable.value
@@ -403,7 +398,7 @@ watch(
               v-for="(column, cI) in computedHeaderColumns"
               :key="column.field"
               :class="column.class"
-              :style="getColumnStyle(column)"
+              :style="column.style"
             >
               <div class="mc-table__table_header-cell_content">
                 <div class="mc-table__table_header-cell_content-left">
@@ -468,7 +463,7 @@ watch(
                 v-for="(column, cI) in computedBodyColumns"
                 :key="column.field"
                 :class="column.class"
-                :style="getColumnStyle(column)"
+                :style="column.style"
               >
                 <div class="mc-table__table_body-cell_content">
                   <div class="mc-table__table_body-cell_content-left">
@@ -493,7 +488,7 @@ watch(
                     </slot>
                   </div>
                   <!-- slot срава от контента (по именем колонки + '-right') -->
-                  <div v-if="column.hasRightSlot" class="mc-table__table_body-cell_content-right">
+                  <div v-if="$slots[`${column.field}-right`]" class="mc-table__table_body-cell_content-right">
                     <slot
                       :name="`${column.field}-right`"
                       :row="row"
@@ -515,7 +510,7 @@ watch(
               >
                 <div class="mc-table__table_body-cell_content">
                   <div class="mc-table__table_body-cell_content-left"></div>
-                  <div v-if="column.hasRightSlot" class="mc-table__table_body-cell_content-right"></div>
+                  <div v-if="$slots[`${column.field}-right`]" class="mc-table__table_body-cell_content-right"></div>
                 </div>
               </div>
             </div>
@@ -534,7 +529,7 @@ watch(
               v-for="(column, cI) in computedFooterColumns"
               :key="column.field"
               :class="column.class"
-              :style="getColumnStyle(column)"
+              :style="column.style"
             >
               <slot
                 :name="`${column.field}-footer-cell`"

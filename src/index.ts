@@ -1,4 +1,5 @@
 import { App, shallowReactive } from 'vue'
+import { setStoredAppContext } from './storedAppContext'
 import { IDSOptions } from './types'
 import { useHelper } from '@/composables'
 import { Themes } from '@/enums'
@@ -40,5 +41,6 @@ export default {
 
     app.config.globalProperties.$dsOptions = dsOptions
     app.provide('dsOptions', dsOptions)
+    setStoredAppContext((app as App & { _context?: unknown })._context ?? null)
   }
 }

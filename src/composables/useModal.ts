@@ -1,5 +1,6 @@
-import { reactive, h, render, shallowRef, markRaw, inject, getCurrentInstance, AppContext } from 'vue'
+import { reactive, h, render, shallowRef, markRaw, inject } from 'vue'
 import ModalContainer from '@/components/templates/McModal/McModalContainer.vue'
+import { getStoredAppContext } from '@/storedAppContext'
 import type { IModalServiceState, IModalState } from '@/types/IModal'
 import { IDSOptions } from '@/types'
 
@@ -13,24 +14,28 @@ const modalServiceState = reactive<IModalServiceState>({
   closeServiceState: closeServiceState
 })
 
-const appContent = shallowRef<AppContext | null>(null)
 const modalComponents = shallowRef({})
 const reactiveProps = reactive<{ modals: IModalState[] }>({ modals: [] })
 
 const createModalContainer = () => {
+  if (typeof window === 'undefined') return
   const modalContainerElement = document.createElement('div')
   modalContainerElement.id = 'modal-container'
   document.body.appendChild(modalContainerElement)
 
   const vnode = h(ModalContainer, { modalServiceState, reactiveProps })
-  vnode.appContext = appContent.value
+  vnode.appContext = getStoredAppContext()
   render(vnode, modalContainerElement)
 }
 
-// Если компонент ModalContainer ещё не был добавлен в DOM, создаем его
 const ensureModalContainerExists = () => {
-  if (!document.getElementById('modal-container')) {
+  if (document.getElementById('modal-container')) return
+  if (getStoredAppContext()) {
     createModalContainer()
+  } else {
+    console.warn(
+      'Mediacube UI Modal: app context not available. Ensure MediacubeUI is installed with app.use(MediacubeUI, { modalComponents: {...} }) so the modal container can be created.'
+    )
   }
 }
 
@@ -91,8 +96,6 @@ const closeAllModals = () => {
 }
 
 export function useModal() {
-  const instance = getCurrentInstance()
-  appContent.value = instance?.appContext || null
   const dsOptions = inject<IDSOptions>('dsOptions', {})
   if (dsOptions.modalComponents) {
     modalComponents.value = dsOptions.modalComponents
