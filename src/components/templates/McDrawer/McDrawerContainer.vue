@@ -65,7 +65,7 @@ const closeDrawer = (value: IDrawerState) => {
 }
 
 const handleKeyUp = (e: KeyboardEvent) => {
-  if(e.code === 'Escape' && computedDrawers.value?.length) {
+  if (e.code === 'Escape' && computedDrawers.value?.length) {
     const last_drawer = computedDrawers.value[computedDrawers.value.length - 1]
     if (last_drawer.drawerProps?.disableBgClick) return
     last_drawer.close()
@@ -93,7 +93,9 @@ onBeforeUnmount(() => {
       :class="{ 'mc-drawer-container__item--multiple': computedDrawers.length - 1 !== i }"
       :style="drawer.indent ? { transform: `translateX(-${drawer.indent}px)` } : {}"
     >
-      <component :is="drawer.component" v-bind="drawer.componentProps" @close-drawer="() => closeDrawer(drawer)" />
+      <Suspense>
+        <component :is="drawer.component" v-bind="drawer.componentProps" @close-drawer="() => closeDrawer(drawer)" />
+      </Suspense>
     </mc-drawer>
   </div>
 </template>
