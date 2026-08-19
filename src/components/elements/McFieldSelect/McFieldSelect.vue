@@ -469,7 +469,7 @@ const computedModelValue = computed({
   }
 })
 
-const actualizeSavedOptions = (payload: ISelectOption[] = []): void => {
+const actualizeSavedOptions = (payload: ISelectOption[] = props.options as ISelectOption[]): void => {
   //Фильтруем локальные опции и оставляем только те, значения которых выбраны в селекте
   const unique = new Set()
 
