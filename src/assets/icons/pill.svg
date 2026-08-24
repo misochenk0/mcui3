@@ -1,0 +1,7 @@
+<svg data-token-name="pill" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.3179 13.318L7.60742 7.60756" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16.7849 12L17.5948 11.1901C18.4945 10.2903 19 9.07005 19 7.79764C19 6.52523 18.4945 5.30494 17.5948 4.40521C16.6951 3.50548 15.4748 3.00002 14.2024 3.00002C12.93 3.00002 11.7097 3.50548 10.8099 4.40521L4.40519 10.8099C3.50546 11.7097 3 12.93 3 14.2024C3 15.4748 3.50546 16.6951 4.40519 17.5948C5.30492 18.4945 6.52522 19 7.79763 19C9.07004 19 10.2903 18.4945 11.1901 17.5948L12 16.7849" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16.5 21C18.9853 21 21 18.9853 21 16.5C21 14.0147 18.9853 12 16.5 12C14.0147 12 12 14.0147 12 16.5C12 18.9853 14.0147 21 16.5 21Z" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16.5 15V18" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M15 16.5H18" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
