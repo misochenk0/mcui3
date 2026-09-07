@@ -130,6 +130,7 @@ const modalTransition = useTransition(modalTransitionState, {
 })
 
 const mcModalBody = ref<HTMLElement | null>(null)
+const mcModalTitle = ref<HTMLElement | null>(null)
 const modalInner = ref<HTMLElement | null>(null)
 const resize_observer = ref<ResizeObserver | null>(null)
 
@@ -229,11 +230,25 @@ const getSizeDifferences = (): number => {
     +data.modal_params['--mc-modal-button-height-small'] || remToPx(Sizes[data.footer.button.small])
 
   const indentDifferences = (padding - paddingSmall) * 3 + paddingSmall
-  const lineHeightDifferences = headerLineHeight - headerLineHeightSmall
+  /**
+   * Заголовок может переноситься на несколько строк, а padding-small в CSS
+   * сжимает line-height каждой строки. Считаем реальное число строк тайтла,
+   * а не считаем его однострочным, иначе экономия высоты недооценивается
+   * и переключение mc-modal--small-indents происходит не вовремя.
+   */
+  const currentLineHeight = data.small_indents ? headerLineHeightSmall : headerLineHeight
+  const titleLines =
+    mcModalTitle.value && currentLineHeight
+      ? Math.max(1, Math.round(mcModalTitle.value.scrollHeight / currentLineHeight))
+      : 1
+  const lineHeightDifferences = (headerLineHeight - headerLineHeightSmall) * titleLines
   const buttonDifferences = buttonHeight - buttonHeightSmall
 
   return indentDifferences + lineHeightDifferences + buttonDifferences
 }
+
+// Порог, с которого считаем, что скролл "реально есть" (а не суб-пиксельный шум)
+const SCROLL_OFFSET_PX = 2
 
 /**
  * Устанавливаем сепараторы, если есть скролл
@@ -242,22 +257,26 @@ const calculateSeparators = (): void => {
   if (!mcModalBody.value) return
 
   const { scrollTop, scrollHeight, clientHeight } = mcModalBody.value
-  // Сепаратор появится если высота скролла будет > 2px
-  const offset = 2
-  data.scrolled_top = scrollTop > offset
+  data.scrolled_top = scrollTop > SCROLL_OFFSET_PX
+  data.scrolled_bottom = scrollTop + clientHeight < scrollHeight - SCROLL_OFFSET_PX
+}
+
+const calculateSmallIndents = (): void => {
+  if (!mcModalBody.value) return
+
+  const { scrollTop } = mcModalBody.value
 
   if (!data.small_indents) {
-    data.small_indents = scrollTop > offset && data.can_shorten_modal
+    data.small_indents = scrollTop > SCROLL_OFFSET_PX && data.can_shorten_modal
   } else {
     data.small_indents = scrollTop > 0
   }
-
-  data.scrolled_bottom = scrollTop + clientHeight < scrollHeight - offset
 }
 
 const scrollHandler = (): void => {
   calculateIndents()
   calculateSeparators()
+  calculateSmallIndents()
 }
 
 const onBodyScroll = (): void => {
@@ -322,6 +341,8 @@ const getParams = (): void => {
   }
 }
 
+const SMALL_INDENTS_SAFETY_MARGIN_PX = 24
+
 const calculateIndents = (): void => {
   /* Сжимаем шапку/футер только если overflow больше, чем экономия от сжатия */
   if (!mcModalBody.value) return
@@ -330,7 +351,7 @@ const calculateIndents = (): void => {
   const sizeDifferences = getSizeDifferences()
 
   if (!data.small_indents || scrollTop === 0) {
-    data.can_shorten_modal = scrollHeight - clientHeight > sizeDifferences
+    data.can_shorten_modal = scrollHeight - clientHeight - sizeDifferences > SMALL_INDENTS_SAFETY_MARGIN_PX
   }
 }
 
@@ -395,7 +416,7 @@ watch(
     <div class="mc-modal" :class="classes" :style="styles">
       <div ref="modalInner" class="mc-modal__inner" :class="{ 'mc-modal__inner--with-title': $slots.title }">
         <div v-if="$slots.title" class="mc-modal__header">
-          <div class="mc-modal__title">
+          <div ref="mcModalTitle" class="mc-modal__title">
             <!-- @slot Слот заголовка -->
             <slot name="title" />
           </div>

@@ -140,13 +140,12 @@
 
   &__header {
     flex-shrink: 0;
-    transition: $duration-s all;
+    transition: padding-block $duration-s, border-color $duration-s;
     padding: var(--mc-modal-padding) $space-200 $space-350;
     border-color: $border-color;
     @media #{$media-query-s} {
       padding: $space-350;
       .mc-title {
-        transition: $duration-s all;
         line-height: var(--mc-modal-header-line-height);
       }
     }
