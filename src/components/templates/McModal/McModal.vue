@@ -123,6 +123,9 @@ const props = defineProps({
   }
 })
 
+const SMALL_INDENTS_SAFETY_MARGIN_PX = 24
+const SCROLL_OFFSET_PX = 2
+
 const modalTransitionState = ref<number>(0)
 const modalTransition = useTransition(modalTransitionState, {
   duration: props.duration || 300,
@@ -173,7 +176,7 @@ const classes = computed((): { [key: string]: boolean } => {
     'mc-modal--top-padding': props.topPadding,
     'mc-modal--small-indents': data.small_indents,
     [`mc-modal--variation-${props.variation}`]: !!props.variation,
-    [`mc-modal--header-align-${props.headerAlign}`]: (props.closeVisible || props.arrowVisible) && !!props.headerAlign,
+    [`mc-modal--header-align-${props.headerAlign}`]: (props.closeVisible || props.arrowVisible) && !!props.headerAlign
   }
 })
 
@@ -187,7 +190,7 @@ const styles = computed((): { [key: string]: string | number } => {
     '--mc-modal-button-height-small': Sizes[data.footer.button.small],
     '--mc-modal-max-width': `${props.maxWidth + 24}px`,
     '--mc-modal-min-width': `${props.minWidth - 24}px`,
-    '--mc-modal-state-number': modalTransition.value,
+    '--mc-modal-state-number': modalTransition.value
   }
 })
 
@@ -214,28 +217,18 @@ const getSizeDifferences = (): number => {
   const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize)
   const remToPx = (rem: string): number => parseFloat(rem) * rootFontSize
 
-  const padding =
-    +data.modal_params['--mc-modal-padding'] || remToPx(Spaces[data.indent.regular])
-  const paddingSmall =
-    +data.modal_params['--mc-modal-padding-small'] || remToPx(Spaces[data.indent.small])
+  const padding = +data.modal_params['--mc-modal-padding'] || remToPx(Spaces[data.indent.regular])
+  const paddingSmall = +data.modal_params['--mc-modal-padding-small'] || remToPx(Spaces[data.indent.small])
   const headerLineHeight =
-    +data.modal_params['--mc-modal-header-line-height'] ||
-    remToPx(LineHeights[data.header.title.line_height.regular])
+    +data.modal_params['--mc-modal-header-line-height'] || remToPx(LineHeights[data.header.title.line_height.regular])
   const headerLineHeightSmall =
     +data.modal_params['--mc-modal-header-line-height-small'] ||
     remToPx(LineHeights[data.header.title.line_height.small])
-  const buttonHeight =
-    +data.modal_params['--mc-modal-button-height'] || remToPx(Sizes[data.footer.button.regular])
+  const buttonHeight = +data.modal_params['--mc-modal-button-height'] || remToPx(Sizes[data.footer.button.regular])
   const buttonHeightSmall =
     +data.modal_params['--mc-modal-button-height-small'] || remToPx(Sizes[data.footer.button.small])
 
   const indentDifferences = (padding - paddingSmall) * 3 + paddingSmall
-  /**
-   * Заголовок может переноситься на несколько строк, а padding-small в CSS
-   * сжимает line-height каждой строки. Считаем реальное число строк тайтла,
-   * а не считаем его однострочным, иначе экономия высоты недооценивается
-   * и переключение mc-modal--small-indents происходит не вовремя.
-   */
   const currentLineHeight = data.small_indents ? headerLineHeightSmall : headerLineHeight
   const titleLines =
     mcModalTitle.value && currentLineHeight
@@ -246,9 +239,6 @@ const getSizeDifferences = (): number => {
 
   return indentDifferences + lineHeightDifferences + buttonDifferences
 }
-
-// Порог, с которого считаем, что скролл "реально есть" (а не суб-пиксельный шум)
-const SCROLL_OFFSET_PX = 2
 
 /**
  * Устанавливаем сепараторы, если есть скролл
@@ -340,8 +330,6 @@ const getParams = (): void => {
     console.error(e)
   }
 }
-
-const SMALL_INDENTS_SAFETY_MARGIN_PX = 24
 
 const calculateIndents = (): void => {
   /* Сжимаем шапку/футер только если overflow больше, чем экономия от сжатия */
