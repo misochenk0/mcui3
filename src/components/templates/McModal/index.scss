@@ -2,8 +2,6 @@
 @use '../../../assets/tokens/z-indexes' as *;
 @use '../../../assets/tokens/durations' as *;
 @use '../../../assets/tokens/font-families' as *;
-@use '../../../assets/tokens/font-weights' as *;
-@use '../../../assets/tokens/font-sizes' as *;
 @use '../../../assets/tokens/spacings' as *;
 @use '../../../assets/tokens/sizes' as *;
 @use '../../../assets/tokens/line-heights' as *;
@@ -22,7 +20,6 @@
   --mc-modal-padding: #{$space-400};
   --mc-modal-padding-small: #{$space-150};
   --mc-modal-header-line-height: #{$line-height-300};
-  --mc-modal-header-line-height-small: #{$line-height-250};
   --mc-modal-button-height: #{$size-600};
   --mc-modal-button-height-small: #{$size-500};
   --mc-modal-max-width: 510px;
@@ -140,12 +137,13 @@
 
   &__header {
     flex-shrink: 0;
-    transition: padding-block $duration-s, border-color $duration-s;
+    transition: $duration-s all;
     padding: var(--mc-modal-padding) $space-200 $space-350;
     border-color: $border-color;
     @media #{$media-query-s} {
       padding: $space-350;
       .mc-title {
+        transition: $duration-s all;
         line-height: var(--mc-modal-header-line-height);
       }
     }
@@ -264,9 +262,6 @@
         &__header {
           padding-block: var(--mc-modal-padding-small) !important;
           .mc-title {
-            font-weight: $font-weight-semi-bold;
-            font-size: $font-size-300;
-            line-height: var(--mc-modal-header-line-height-small);
             align-items: center;
           }
         }
